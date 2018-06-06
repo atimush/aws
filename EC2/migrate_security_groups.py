@@ -13,8 +13,13 @@ Supports:
 
 IMPORTANT: Might be incompatible with older versions of AWS CLI!
 """
+__author__ = 'Andrei Timush'
 
-import os, sys, subprocess, getopt, json
+import os
+import sys
+import subprocess
+import getopt
+import json
 
 def getid_sg(region,vpc,gname):
     cmd = ['aws', 'ec2', 'describe-security-groups', '--region=%s' %region, '--filters', 'Name=vpc-id,Values=%s' %vpc, 'Name=group-name,Values=%s' %gname, '--query', 'SecurityGroups[*].{grid:GroupId}']
