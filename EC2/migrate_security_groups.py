@@ -75,6 +75,10 @@ def migrate_tags(selector):
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "sreg=", "dreg=", "svpc=", "dvpc=", "gnames=", "tags="])
+        if len(sys.argv[1:]) < 5:
+            print "ERROR: Mandatory arguments not supplied"
+            usage()
+            sys.exit(2)
     except getopt.GetoptError as err:
         print "ERROR: " + str(err)
         usage()
