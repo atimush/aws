@@ -21,8 +21,10 @@ import subprocess
 import getopt
 import json
 
-def getid_sg(region,vpc,gname):
-    cmd = ['aws', 'ec2', 'describe-security-groups', '--region=%s' %region, '--filters', 'Name=vpc-id,Values=%s' %vpc, 'Name=group-name,Values=%s' %gname, '--query', 'SecurityGroups[*].{grid:GroupId}']
+
+def getid_sg(region, vpc, gname):
+    cmd = ['aws', 'ec2', 'describe-security-groups', '--region=%s' % region, '--filters', 'Name=vpc-id,Values=%s' % vpc,
+           'Name=group-name,Values=%s' % gname, '--query', 'SecurityGroups[*].{grid:GroupId}']
     get = subprocess.check_output(cmd)
     data = json.loads(get)
     if data:
@@ -32,7 +34,8 @@ def getid_sg(region,vpc,gname):
         grid = None
         return grid
 
-def migrate_policy(direction,family):
+
+def migrate_policy(direction, family):
     if direction == 'IpPermissions':
         call = 'ingress'
     if direction == 'IpPermissionsEgress':
@@ -52,12 +55,16 @@ def migrate_policy(direction,family):
                 idesc = iipr['Description']
             if family == 'IpRanges':
                 icidr = iipr['CidrIp']
-                cmd = "aws --region %s ec2 authorize-security-group-%s --group-id %s --ip-permissions '[{\"IpProtocol\": \"%s\", \"FromPort\": %s, \"ToPort\": %s, \"IpRanges\": [{\"CidrIp\": \"%s\", \"Description\": \"%s\"}]}]'" %(dregion,call,dgrid,ipr,ifp,itp,icidr,idesc)
+                cmd = "aws --region %s ec2 authorize-security-group-%s --group-id %s --ip-permissions '[{\"IpProtocol\": \"%s\", \"FromPort\": %s, \"ToPort\": %s, \"IpRanges\": [{\"CidrIp\": \"%s\", \"Description\": \"%s\"}]}]'" % (
+                dregion, call, dgrid, ipr, ifp, itp, icidr, idesc)
             if family == 'Ipv6Ranges':
                 icidr = iipr['CidrIpv6']
-                cmd = "aws ec2 --region %s authorize-security-group-%s --group-id %s --ip-permissions '[{\"IpProtocol\": \"%s\", \"FromPort\": %s, \"ToPort\": %s, \"Ipv6Ranges\": [{\"CidrIpv6\": \"%s\", \"Description\": \"%s\"}]}]'" %(dregion,call,dgrid,ipr,ifp,itp,icidr,idesc)
-            print "        ---> Migrating %s rule: %s --- %s:%s --- %s \"%s\"" %(call.upper(),ipr.upper(),ifp,itp,icidr,idesc)
+                cmd = "aws ec2 --region %s authorize-security-group-%s --group-id %s --ip-permissions '[{\"IpProtocol\": \"%s\", \"FromPort\": %s, \"ToPort\": %s, \"Ipv6Ranges\": [{\"CidrIpv6\": \"%s\", \"Description\": \"%s\"}]}]'" % (
+                dregion, call, dgrid, ipr, ifp, itp, icidr, idesc)
+            print "        ---> Migrating %s rule: %s --- %s:%s --- %s \"%s\"" % (
+            call.upper(), ipr.upper(), ifp, itp, icidr, idesc)
             os.system(cmd)
+
 
 def migrate_tags(selector):
     if 'Tags' in sg:
@@ -67,19 +74,22 @@ def migrate_tags(selector):
                 if 'Name' in stag['Key']:
                     tagkey = stag['Key']
                     tagvalue = stag['Value']
-                    print "        ---> Migrating TAG Key:'%s' Value:'%s'" %(tagkey,tagvalue)
-                    cmd = "aws ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" %(dgrid,tagkey,tagvalue)
+                    print "        ---> Migrating TAG Key:'%s' Value:'%s'" % (tagkey, tagvalue)
+                    cmd = "aws ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" % (
+                    dgrid, tagkey, tagvalue)
                     os.system(cmd)
             elif selector == 'all':
-                    tagkey = stag['Key']
-                    tagvalue = stag['Value']
-                    print "        ---> Migrating TAG Key:'%s' Value:'%s'" %(tagkey,tagvalue)
-                    cmd = "aws ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" %(dgrid,tagkey,tagvalue)
-                    os.system(cmd)
+                tagkey = stag['Key']
+                tagvalue = stag['Value']
+                print "        ---> Migrating TAG Key:'%s' Value:'%s'" % (tagkey, tagvalue)
+                cmd = "aws ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" % (dgrid, tagkey, tagvalue)
+                os.system(cmd)
+
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "sreg=", "dreg=", "svpc=", "dvpc=", "gnames=", "tags="])
+        opts, args = getopt.getopt(sys.argv[1:], "hs:",
+                                   ["help", "sreg=", "dreg=", "svpc=", "dvpc=", "gnames=", "tags="])
         if len(sys.argv[1:]) < 5:
             print "ERROR: Mandatory arguments not supplied"
             usage()
@@ -114,41 +124,46 @@ def main():
         elif o in ("-t", "--tags"):
             tags = a
 
-# Get Group ID and validate if exists in source Region/VPC
+    # Get Group ID and validate if exists in source Region/VPC
     for gname in gname_list:
-        sgrid = getid_sg(sregion,svpc,gname)
+        sgrid = getid_sg(sregion, svpc, gname)
         if sgrid != None:
-            print "\n-------------- Processing %s Group --------------" %gname.upper()
-            print "INFO: Group has been validated in source %s/%s" %(sregion.upper(),svpc.upper())
+            print "\n-------------- Processing %s Group --------------" % gname.upper()
+            print "INFO: Group has been validated in source %s/%s" % (sregion.upper(), svpc.upper())
         else:
             print "ERROR: Unable to find the source group"
             sys.exit(2)
 
-        cmd1 = ['aws', 'ec2', 'describe-security-groups', '--region=%s' %sregion, '--output=json', '--group-id=%s' % sgrid]
+        cmd1 = ['aws', 'ec2', 'describe-security-groups', '--region=%s' % sregion, '--output=json',
+                '--group-id=%s' % sgrid]
         get = subprocess.check_output(cmd1)
         data = json.loads(get)
-        global sg,dgrid
+        global sg, dgrid
         sg = data['SecurityGroups'][0]
         sdesc = sg['Description']
         sname = sg['GroupName']
-        dgrid = getid_sg(dregion,dvpc,gname)
+        dgrid = getid_sg(dregion, dvpc, gname)
 
         if dgrid == None:
-            print "INFO: Target group is missing in %s/%s. Creating it and migrating rules:" %(dregion.upper(),dvpc.upper())
-            cmd2 = "aws ec2 create-security-group --group-name '%s' --description \"%s\" --vpc-id %s" %(sname,sdesc,dvpc)
+            print "INFO: Target group is missing in %s/%s. Creating it and migrating rules:" % (
+            dregion.upper(), dvpc.upper())
+            cmd2 = "aws ec2 create-security-group --group-name '%s' --description \"%s\" --vpc-id %s" % (
+            sname, sdesc, dvpc)
             os.system(cmd2)
-            dgrid = getid_sg(dregion,dvpc,gname)
+            dgrid = getid_sg(dregion, dvpc, gname)
         else:
-            print "INFO: Target group is present in %s/%s.      \nMigrating rules only (duplicates might be expected):" %(dregion.upper(),dvpc.upper())
+            print "INFO: Target group is present in %s/%s.      \nMigrating rules only (duplicates might be expected):" % (
+            dregion.upper(), dvpc.upper())
 
-        migrate_policy('IpPermissions','IpRanges')
-        migrate_policy('IpPermissions','Ipv6Ranges')
-        migrate_policy('IpPermissionsEgress','IpRanges')
-        migrate_policy('IpPermissionsEgress','Ipv6Ranges')
+        migrate_policy('IpPermissions', 'IpRanges')
+        migrate_policy('IpPermissions', 'Ipv6Ranges')
+        migrate_policy('IpPermissionsEgress', 'IpRanges')
+        migrate_policy('IpPermissionsEgress', 'Ipv6Ranges')
         if tags == 'name':
             migrate_tags('name')
         elif tags == 'all':
             migrate_tags('all')
+
 
 def usage():
     print "EXAMPLE: migrate_security_groups.py --sreg=eu-west-2 --dreg=eu-west-1 --svpc=vpc-2f987446 --dvpc=vpc-a36511c7 --gnames='test1' --tags=name"
@@ -160,6 +175,7 @@ def usage():
     print "     -dv --dvpc          - Destination VPC ID"
     print "     -gn --gnames        - Security Group Name"
     print "     -t  --tags          - Optional: Tag options (Key:Name Only/ALL)"
+
 
 if __name__ == "__main__":
     main()
