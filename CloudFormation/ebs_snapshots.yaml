@@ -11,6 +11,8 @@
 # IMPORTANT:
 # 1. CF Stack will require additional validation to use the IAM Grants.
 # Confirmation (Check Box) is mandatory.
+#
+# author: 'Andrei Timush'
 
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "EBS Snapshot Provisioning"

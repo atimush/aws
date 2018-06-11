@@ -15,7 +15,7 @@ will not be automatically deleted!
 2. Region and account_id Lists are mandatory and must be supplied/adjuted manually.
 """
 
-__author__ = 'Andrei Timus'
+__author__ = 'Andrei Timush'
 
 import boto3
 import datetime
