@@ -12,7 +12,7 @@ Supports:
 IMPORTANT:
 1. Volumes marked for backup with 'Backup':'Yes' and without 'BackupRetention' tag
 will not be automatically deleted!
-2. region and account_id Lists are mandatory and must be supplied/adjuted manually.
+2. Region and account_id Lists are mandatory and must be supplied/adjuted manually.
 """
 
 __author__ = 'Andrei Timus'
