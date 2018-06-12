@@ -5,7 +5,7 @@
 # Roll-out steps:
 # 1. Zip the https://github.com/atimush/aws/blob/master/EC2/ebs_snapshots.py file
 # 2. Create S3 bucket and upload to archive.
-# 3. Adjust/Update the 'S3Bucket' and 'S3Key' values in the 'EBSFunction' Resource and job frequency as 'ScheduleExpression'.
+# 3. Adjust/Update the 'S3Bucket', 'S3Key' values in the 'EBSFunction' Resource and job frequency as 'ScheduleExpression'.
 # 4. Create and run a CF Stack as defined below.
 #
 # IMPORTANT:
