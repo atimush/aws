@@ -70,19 +70,19 @@ def migrate_tags(selector):
     if 'Tags' in sg:
         stags = sg['Tags']
         for stag in stags:
-            if selector == 'name':
+            if selector == 'Name':
                 if 'Name' in stag['Key']:
                     tagkey = stag['Key']
                     tagvalue = stag['Value']
                     print "        ---> Migrating TAG Key:'%s' Value:'%s'" % (tagkey, tagvalue)
-                    cmd = "aws ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" % (
-                    dgrid, tagkey, tagvalue)
+                    cmd = "aws --region %s ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" % (
+                    dregion, dgrid, tagkey, tagvalue)
                     os.system(cmd)
             elif selector == 'all':
                 tagkey = stag['Key']
                 tagvalue = stag['Value']
                 print "        ---> Migrating TAG Key:'%s' Value:'%s'" % (tagkey, tagvalue)
-                cmd = "aws ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" % (dgrid, tagkey, tagvalue)
+                cmd = "aws --region %s ec2 create-tags --resources '%s' --tags Key=\"%s\",Value=\"%s\"" % (dregion, dgrid, tagkey, tagvalue)
                 os.system(cmd)
 
 
@@ -147,8 +147,8 @@ def main():
         if dgrid == None:
             print "INFO: Target group is missing in %s/%s. Creating it and migrating rules:" % (
             dregion.upper(), dvpc.upper())
-            cmd2 = "aws ec2 create-security-group --group-name '%s' --description \"%s\" --vpc-id %s" % (
-            sname, sdesc, dvpc)
+            cmd2 = "aws --region %s ec2 create-security-group --group-name '%s' --description \"%s\" --vpc-id %s" % (
+            dregion, sname, sdesc, dvpc)
             os.system(cmd2)
             dgrid = getid_sg(dregion, dvpc, gname)
         else:
@@ -159,14 +159,14 @@ def main():
         migrate_policy('IpPermissions', 'Ipv6Ranges')
         migrate_policy('IpPermissionsEgress', 'IpRanges')
         migrate_policy('IpPermissionsEgress', 'Ipv6Ranges')
-        if tags == 'name':
-            migrate_tags('name')
+        if tags == 'Name':
+            migrate_tags('Name')
         elif tags == 'all':
             migrate_tags('all')
 
 
 def usage():
-    print "EXAMPLE: migrate_security_groups.py --sreg=eu-west-2 --dreg=eu-west-1 --svpc=vpc-2f987446 --dvpc=vpc-a36511c7 --gnames='test1' --tags=name"
+    print "EXAMPLE: migrate_security_groups.py --sreg=eu-west-2 --dreg=eu-west-1 --svpc=vpc-2f987446 --dvpc=vpc-a36511c7 --gnames='test1' --tags=Name"
     print "EXAMPLE: migrate_security_groups.py --sreg=eu-west-2 --dreg=eu-west-1 --svpc=vpc-2f987446 --dvpc=vpc-a36511c7 --gnames='test1','test 2' --tags=all"
     print "     -h  --help          - Helper"
     print "     -sr --sreg          - Source region"
